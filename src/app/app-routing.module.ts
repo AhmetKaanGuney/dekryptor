@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { LoadingBarComponent } from './components/loading-bar/loading-bar.component';
 
 const routes: Routes = [];
 
