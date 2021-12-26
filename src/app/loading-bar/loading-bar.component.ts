@@ -7,9 +7,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LoadingBarComponent implements OnInit {
 
-  constructor() { }
+  progress: number = 0;
 
-  ngOnInit(): void {
-  }
+  constructor() {}
+
+  ngOnInit(): void {}
 
 }

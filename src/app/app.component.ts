@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import { EncryptedTextComponent } from './encrypted-text/encrypted-text.component';
 
 @Component({
   selector: 'app-root',
