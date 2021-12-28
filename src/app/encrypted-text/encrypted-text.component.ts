@@ -2,13 +2,9 @@ import { Component, OnInit } from '@angular/core';
 
 interface Word {
   original: string;
-  encrypted: string;
+  output: string;
   finished: boolean;
-  decryptedIndexes: number[];
-}
-
-interface Line {
-  words: Word[];
+  ignoredIndexes: number[];
 }
 
 @Component({
@@ -16,133 +12,171 @@ interface Line {
   templateUrl: './encrypted-text.component.html',
   styleUrls: ['./encrypted-text.component.css']
 })
+
+
 export class EncryptedTextComponent implements OnInit {
-  originalText: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed dolor ac mi fermentum consectetur. Etiam volutpat elit nunc, ac rhoncus felis gravida vitae. Integer vel lorem ullamcorper, volutpat tortor sit amet, bibendum nisi. Sed auctor maximus sapien nec rhoncus. Mauris lacinia lorem at lectus rutrum, nec blandit ante consequat."
-  outputText: string = "todo";
-  text = {} as Word;
-  lines: Line[] = [];
-  output = "";
+  // "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nSed sed dolor ac mi fermentum consectetur."
+  // "Learn one way to build applications with \nAngular and reuse your code and abilities to build apps for any \ndeployment target. For web, \nmobile web, \nnative mobile \nand native desktop."
+  originalText: string = "Learn one way to build applications with \nAngular and reuse your code\n and abilities to build apps for any deployment target. \nFor web, \nmobile web, \nnative mobile \nand native desktop.";
+  outputText: string = this.encryptString(this.originalText);
+  words: Word[] = [];
 
-  constructor() { 
-
-  }
+  constructor() {}
 
   ngOnInit(): void {
+    // Generate Word objects from original text
+    this.words = ((): Word[] => {
+      // Generate Words from encryptedText
+      let words: Word[] = [];
+      let encryptedList = this.outputText.split(/(\s)/);
+      let originalList = this.originalText.split(/(\s)/);
+  
+      for (let i = 0; i < encryptedList.length; i++) {
+        let word = {original: originalList[i], 
+                    output: encryptedList[i],
+                    // if word doesn't have any valid character
+                    // meaning str has "" or only spaces consider it finished
+                    finished: this.hasNoValidCharacter(originalList[i]) ? true : false, 
+                    ignoredIndexes: this.getSpecialCharIndexesOf(originalList[i])
+                  } as Word;
+        words.push(word);
+        console.log(word)
+      }
+      return words;
+    }) ();
   }
   
-
-  // DEBUG PLS
+  
+  
   async onBegin() {
-    this.text.original = "original test for the original text";
-    this.text.finished = false;
-    this.text.decryptedIndexes = [];
+    let iteration = 0;
 
-    this.lines = readLines(this.text.original);
-    for (let line of readLines(this.text.original)) {
-      for (let word of line.words) {
-        this.output += word.original;
+    // Until all words are finished
+    while (!this.wordsFinished(this.words)) {
+      // If word is not finihed decrypt that word
+      for (let word of this.words) {
+        if (!word.finished) {
+          this.decryptWord(word);
+        }
+      }
+      // Update encryptedText view
+      this.outputText = ((): string => {
+        let text = "";
+        for (let word of this.words) {
+          text += word.output;
+        }
+        return text;
+      })();
+
+      iteration++;
+      console.log("Iteration: ", iteration);
+
+      await sleep(randomInt(75, 75 + iteration * 10));
+    }
+  }
+
+  wordsFinished(words: Word[]): boolean {
+    for (let word of words) {
+      if (!word.finished) {
+        return false;
       }
     }
-    await sleep(5000)
-
-    this.encryptWord(this.text);
-    while (this.text.finished == false) {
-      console.log(this.text)
-      this.decryptWord(this.text);
-      this.output = this.text.encrypted;
-      await sleep(10000);
-    }
-    // let second: number = 1000;
-    // let duration: number = 2 * second;
-
-    // // ============================== //
-    // // ===      DECRYPT TEXT      === //
-    // // ============================== //
-    // // Loop: read output
-    // let encryptedWords: string[] = this.outputText.split(" ");
-    // let originalWords: string[] = this.originalText.split(" ");
-
-    // let decryptInterval = setInterval(() => {
-    //   // Decrypt Text 
-    //   let temp: string = "";
-
-    //   // Iterate each word
-    //   for (let i = 0; i < encryptedWords.length; i++) {
-    //     let word : string = encryptedWords[i];
-    //     let originalWord: string = originalWords[i];
-
-    //     // Cleverly pick clean char indexes
-    //     let cleanRange: number = 5;
-
-    //     temp += originalWord.substring(0, cleanRange) + this.randomHex(word.length).substring(cleanRange, 0);
-    //     if (i !== encryptedWords.length - 1) {
-    //       temp += " "
-    //     }
-    //   }
-    //   // Update OutputText
-    //   this.outputText = temp;
-    // }
-    // , 0.1 * second);
-    // setTimeout(clearInterval, duration, decryptInterval)
-    // // this.outputText = "a";
+    return true;
   }
 
-
-  decryptLine(line: string) {
-    let wordList: string[] = line.split(/(\s+)/);
-  }
-
-  decryptWord(word: Word): void {
-    console.log("decryptWord()");
-    let wordLength: number = word.encrypted.length;
-    let newEncryptedString: string = "";
-
-    // Select a random char index to decrypt
-    // meaning replace with orginal char
-    let charIndex: number = randomInt(0, wordLength);
-
-    // Check if selected index is alredy decrypted 
-    while (word.decryptedIndexes.includes(charIndex)) {
-      charIndex = randomInt(0, wordLength);
+  decryptWord(word: Word) {
+    console.log("decyptWord()")
+    if (word.output === "") {
+      word.finished = true;
+      return;
     }
-    word.decryptedIndexes.push(charIndex);
-
-    // Construct newEncryptedString
-    for (let i = 0; i < wordLength; i++) {
-      if (word.decryptedIndexes.includes(i)) {
-        newEncryptedString += word.original[i];
+    word.output = this.decryptString(word.original, word.ignoredIndexes);
+    if (word.output.length === word.ignoredIndexes.length) {
+      word.finished = true;
+    }
+  }
+  
+  decryptString(originalString: string, ignoredIndexes: number[]): string {
+    console.log("decyptString()")
+    console.log("Original str: ", "'" + originalString + "'")
+    let decryptedString: string = "";
+    
+    // Pick a random index to decrypt
+    let randomIndex = randomInt(0, originalString.length);
+    
+    // Check if index should be ignored
+    while (ignoredIndexes.includes(randomIndex)) {
+      randomIndex = randomInt(0, originalString.length);
+      // If selected index if a space break
+      // so that it'll be added to the ignored indexes
+      if (originalString[randomIndex] === " ") {
+        console.log("Space detected: ", "'" + originalString[randomIndex] + "'")
+        break;
+      }
+    }
+    // Add random index to ignoreed indexes
+    // so that char will be replaced with original text
+    ignoredIndexes.push(randomIndex);
+    
+    // Build decrypted string
+    for (let i = 0; i < originalString.length; i++) {
+      // If index alredy decrypted
+      if (ignoredIndexes.includes(i)) {
+        decryptedString += originalString[i];
       } else {
-        // Change rest of the indexes with random chars
-        newEncryptedString += randomHex(1);
+        decryptedString += randomHex(1);
       }
     }
-    // Update word
-    word.encrypted = newEncryptedString;
-
-    // Check if all words are decrypted
-    if (word.encrypted.length === word.decryptedIndexes.length) {
-      word.finished = false;
-    }
-
+    console.log("Decrypted str: ", "'" + decryptedString + "'")
+    return decryptedString
   }
 
-  encryptWord(word: Word) {
-    console.log("encrypting!");
-    console.warn(word);
+  encryptString(str: string): string {
+    console.log("encryptString()")
+    let encrypted: string = "";
 
-    // Generate random hex
-    for (let i = 0; i < word.original.length; i++) {
-      if (i > 0 && word.original.substring(i, i - 1) === "\n") {
-        console.log("New line Detected")
-        word.encrypted += word.original[i];
-        word.decryptedIndexes.push(i);
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === " ") {
+        encrypted += " ";
+      } else if (i < str.length - 2 && str.substring(i, i + 1) === "\n") {
+        encrypted += "\n";
       }
-      word.encrypted += randomHex(1);
+      else {
+        encrypted += randomHex(1);
+      }
     }
+    return encrypted;
+  }
+
+  getSpecialCharIndexesOf(str: string): number[] {
+    let indexes: number[] = [];
+
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === " ") {
+        indexes.push(i);
+      } else if (i < str.length - 2 && str.substring(i, i + 1) === "\n") {
+        console.warn("New line detected at: ", i);
+        indexes.push(i);
+        indexes.push(i + 1);
+      }
+    }
+    return indexes;
+  }
+
+  hasNoValidCharacter(str: string): boolean {
+    if (str === "") {
+      return true;
+    }
+    for (let chr of str) {
+      if (chr !== " ") {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
-function randomHex(length: number) {
+function randomHex(length: number): string {
   let randomHex: string = "";
   let numbers: string[] = ["0", "1", "2", "3", "4", 
                            "5", "6", "7", "8", "9"];
@@ -159,34 +193,8 @@ function randomHex(length: number) {
   return randomHex;
 }
 
-function randomInt(min: number, max: number) {
+function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min);
-}
-
-function readLines(text: string): Line[] {
-  let lineList: string[] = text.split("\n");
-
-  let outputLines: Line[] = [];
-
-  for (let line of lineList) {
-    let words: string[] = line.split(/(\s+)/);
-    let tempLine = {words: []} as Line;
-    
-    // Create Word
-    for (let word of words)  {
-      let tempWord = {
-        original: word, 
-        encrypted: "", 
-        finished: false,
-        decryptedIndexes: []
-      } as Word;
-
-      // Add to Line
-      tempLine.words.push(tempWord);
-    }
-    outputLines.push(tempLine);
-  }
-  return outputLines;
 }
 
 function sleep(ms: number) {
