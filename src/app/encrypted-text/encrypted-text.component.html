@@ -1,6 +1,7 @@
-<div id="text-box">
-    <p>TEST</p>
-    <p id="text-field">{{outputText}}</p>
+<pre id="text-box" class="">
+    <code [highlight]="encryptedText"></code>
+</pre>
+<div class="container">
+    <mat-progress-bar mode="determinate" [value]="progress" color="primary" class="centered"></mat-progress-bar> 
+    <button mat-flat-button color="primary" id="begin-btn" (click)="onBegin()" class="centered">BEGIN</button>
 </div>
-<app-loading-bar></app-loading-bar>
-<button id="decrypt-btn" (click)="onBegin()">&lt; BEGIN &gt;</button>

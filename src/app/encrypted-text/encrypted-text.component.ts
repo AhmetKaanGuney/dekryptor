@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
+
 interface Word {
   original: string;
-  output: string;
+  encrypted: string;
   finished: boolean;
   ignoredIndexes: number[];
 }
@@ -12,67 +13,108 @@ interface Word {
   templateUrl: './encrypted-text.component.html',
   styleUrls: ['./encrypted-text.component.css']
 })
-
-
 export class EncryptedTextComponent implements OnInit {
-  // "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nSed sed dolor ac mi fermentum consectetur."
-  // "Learn one way to build applications with \nAngular and reuse your code and abilities to build apps for any \ndeployment target. For web, \nmobile web, \nnative mobile \nand native desktop."
-  originalText: string = "Learn one way to build applications with \nAngular and reuse your code\n and abilities to build apps for any deployment target. \nFor web, \nmobile web, \nnative mobile \nand native desktop.";
-  outputText: string = this.encryptString(this.originalText);
-  words: Word[] = [];
 
   constructor() {}
+  
+  originalText: string = `
+async onBegin() {
+  let iteration = 0;
+
+  // Until all words are finished
+  while (!this.wordsFinished(this.words)) {
+    // If word is not finihed decrypt that word
+    for (let word of this.words) {
+      if (!word.finished) {
+        this.decryptWord(word);
+      }
+    }
+    // Update encryptedText view
+    this.outputText = ((): string => {
+      let text = "";
+      for (let word of this.words) {
+        text += word.output;
+      }
+      return text;
+    })();
+
+    iteration++;
+    console.log("Iteration: ", iteration);
+
+    await sleep(randomInt(75, 75 + iteration * 10));
+  }
+}`;
+  // originalText: string = "Lol  ";
+  encryptedText: string = this.encryptString(this.originalText);
+  // outputText: string = this.originalText;
+  words: Word[] = [];
+
+  textLength: number = this.originalText.length;
+  maxWordLength: number = 0;
+  progress: number = 0;
 
   ngOnInit(): void {
-    // Generate Word objects from original text
+    // Generate Word objects from original and output text
     this.words = ((): Word[] => {
-      // Generate Words from encryptedText
       let words: Word[] = [];
-      let encryptedList = this.outputText.split(/(\s)/);
-      let originalList = this.originalText.split(/(\s)/);
+      let originalList: string[] = this.originalText.split(/(\s)/);
+      let encryptedList: string[] = this.encryptedText.split(/(\s)/);
+
+      let originalListClone: string[] = [...originalList];
+      this.maxWordLength = originalListClone.sort((a, b) => b.length - a.length)[0].length
+      console.log(this.maxWordLength)
   
       for (let i = 0; i < encryptedList.length; i++) {
-        let word = {original: originalList[i], 
-                    output: encryptedList[i],
-                    // if word doesn't have any valid character
-                    // meaning str has "" or only spaces consider it finished
-                    finished: this.hasNoValidCharacter(originalList[i]) ? true : false, 
-                    ignoredIndexes: this.getSpecialCharIndexesOf(originalList[i])
-                  } as Word;
+        let originalStr: string = originalList[i];
+        let encryptedStr: string = encryptedList[i];
+
+        // if original word is an empty string or contains only spaces
+        // then consider the word finished
+        let word: Word = {original: originalStr, 
+          encrypted: encryptedStr,
+          finished: !originalStr || this.containsOnlySpaces(originalStr) ? true : false, 
+          ignoredIndexes: []
+        };
         words.push(word);
-        console.log(word)
       }
       return words;
     }) ();
   }
-  
-  
-  
-  async onBegin() {
-    let iteration = 0;
 
-    // Until all words are finished
+  async onBegin() {
+    // Max iteration count is equal to
+    // the length of the longest word
+    let iteration = 0;
+    let step = 100 / this.maxWordLength;
+
+    // Until all the Words are finished
     while (!this.wordsFinished(this.words)) {
-      // If word is not finihed decrypt that word
+      // Decrypt Words
       for (let word of this.words) {
         if (!word.finished) {
           this.decryptWord(word);
         }
       }
       // Update encryptedText view
-      this.outputText = ((): string => {
+      this.encryptedText = ((): string => {
         let text = "";
         for (let word of this.words) {
-          text += word.output;
+          text += word.encrypted;
         }
         return text;
       })();
 
       iteration++;
+      this.progress = iteration * step;
       console.log("Iteration: ", iteration);
 
-      await sleep(randomInt(75, 75 + iteration * 10));
+      await sleep(
+            randomInt(75, 75 + iteration * 5)
+            );
+
     }
+
+
   }
 
   wordsFinished(words: Word[]): boolean {
@@ -85,20 +127,13 @@ export class EncryptedTextComponent implements OnInit {
   }
 
   decryptWord(word: Word) {
-    console.log("decyptWord()")
-    if (word.output === "") {
-      word.finished = true;
-      return;
-    }
-    word.output = this.decryptString(word.original, word.ignoredIndexes);
-    if (word.output.length === word.ignoredIndexes.length) {
+    word.encrypted = this.decryptString(word.original, word.ignoredIndexes);
+    if (word.encrypted.length === word.ignoredIndexes.length) {
       word.finished = true;
     }
   }
   
   decryptString(originalString: string, ignoredIndexes: number[]): string {
-    console.log("decyptString()")
-    console.log("Original str: ", "'" + originalString + "'")
     let decryptedString: string = "";
     
     // Pick a random index to decrypt
@@ -107,12 +142,6 @@ export class EncryptedTextComponent implements OnInit {
     // Check if index should be ignored
     while (ignoredIndexes.includes(randomIndex)) {
       randomIndex = randomInt(0, originalString.length);
-      // If selected index if a space break
-      // so that it'll be added to the ignored indexes
-      if (originalString[randomIndex] === " ") {
-        console.log("Space detected: ", "'" + originalString[randomIndex] + "'")
-        break;
-      }
     }
     // Add random index to ignoreed indexes
     // so that char will be replaced with original text
@@ -127,12 +156,10 @@ export class EncryptedTextComponent implements OnInit {
         decryptedString += randomHex(1);
       }
     }
-    console.log("Decrypted str: ", "'" + decryptedString + "'")
     return decryptedString
   }
 
   encryptString(str: string): string {
-    console.log("encryptString()")
     let encrypted: string = "";
 
     for (let i = 0; i < str.length; i++) {
@@ -163,10 +190,7 @@ export class EncryptedTextComponent implements OnInit {
     return indexes;
   }
 
-  hasNoValidCharacter(str: string): boolean {
-    if (str === "") {
-      return true;
-    }
+  containsOnlySpaces(str: string): boolean {
     for (let chr of str) {
       if (chr !== " ") {
         return false;

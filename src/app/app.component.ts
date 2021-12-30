@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { EncryptedTextComponent } from './encrypted-text/encrypted-text.component';
 
 @Component({
