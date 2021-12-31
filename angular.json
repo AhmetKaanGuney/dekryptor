@@ -99,6 +99,16 @@
             ],
             "scripts": []
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "prerender": false,
+            "ssr": false,
+            "browserTarget": "dekryptor:build:production",
+            "firebaseProject": "dekryptor-40e19",
+            "firebaseHostingSite": "dekryptor"
+          }
         }
       }
     }

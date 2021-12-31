@@ -17,8 +17,7 @@ export class EncryptedTextComponent implements OnInit {
 
   constructor() {}
   
-  originalText: string = `
-async onBegin() {
+  originalText: string = `async onBegin() {
   // Max iteration count is equal to
   // the length of the longest word
   let iteration = 0;
@@ -40,26 +39,22 @@ async onBegin() {
       }
       return text;
     })();
-
     iteration++;
     this.progress = iteration * step;
-    console.log("Iteration: ", iteration);
-
     await sleep(
           randomInt(75, 75 + iteration * 5)
           );
-  }
-}`;
-  // originalText: string = "Lol  ";
-  encryptedText: string = this.encryptString(this.originalText);
-  // outputText: string = this.originalText;
+  }};`;
+  encryptedText: string = "";
   words: Word[] = [];
-
-  textLength: number = this.originalText.length;
   maxWordLength: number = 0;
+
   progress: number = 0;
+  decrypted: boolean = false;
+  buttonText: string = "BEGIN";
 
   ngOnInit(): void {
+    this.encryptedText = this.encryptString(this.originalText);
     // Generate Word objects from original and output text
     this.words = ((): Word[] => {
       let words: Word[] = [];
@@ -88,6 +83,18 @@ async onBegin() {
   }
 
   async onBegin() {
+    let btn: any = document.querySelector("button");
+    btn.disabled = true;
+    console.log(btn)
+    if (this.decrypted) {
+      // RESET
+      this.ngOnInit()
+      this.decrypted = false;
+      this.buttonText = "BEGIN";
+      this.progress = 0;
+      btn.disabled  = false;
+      return;
+    }
     // Max iteration count is equal to
     // the length of the longest word
     let iteration = 0;
@@ -115,10 +122,12 @@ async onBegin() {
       console.log("Iteration: ", iteration);
 
       await sleep(
-            randomInt(75, 75 + iteration * 5)
+            randomInt(125, 125 + iteration * 10)
             );
-
     }
+    this.decrypted = true;
+    this.buttonText = "RESET";
+    btn.disabled = false;
   }
 
   wordsFinished(words: Word[]): boolean {

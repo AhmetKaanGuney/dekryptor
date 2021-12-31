@@ -1,7 +1,7 @@
-<pre id="text-box" class="">
-    <code [highlight]="encryptedText"></code>
+<pre class="">
+    <code [highlight]="encryptedText" id="text-box"></code>
 </pre>
 <div class="container">
     <mat-progress-bar mode="determinate" [value]="progress" color="primary" class="centered"></mat-progress-bar> 
-    <button mat-flat-button color="primary" id="begin-btn" (click)="onBegin()" class="centered">BEGIN</button>
+    <button mat-flat-button color="primary" id="begin-btn" (click)="onBegin()" class="centered">{{ buttonText }}</button>
 </div>

@@ -42,7 +42,7 @@
 }
 
 html {
-    background-image: linear-gradient(to bottom, rgb(40, 44, 52), rgb(43, 40, 52), rgb(51, 40, 52));
+    background-color: rgb(40, 44, 52);
     font-family: Helvetica, Tahoma, Geneva, Verdana, sans-serif;
     color: var(--white);
 }
@@ -54,10 +54,16 @@ h1 {
     color: transparent;
     text-align: center;
     margin-top: 1rem;
-    padding-top: 0rem;
     margin-bottom: 0px;
     margin-left: auto;
     margin-right: auto;
+}
+
+pre {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0px;
+    max-height: min-content;
 }
 
 pre code.hljs {
@@ -65,17 +71,22 @@ pre code.hljs {
     margin-bottom: 0px;
     padding-top: 0px;
     padding-bottom: 0px;
+    padding-left: 0px;
+    margin-left: 0px;
 }
 
 code.hljs {
     margin-top: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
+
 
 mat-progress-bar {
     display:inline;
     justify-content: center;
     border-radius: 0.4rem;
-    max-width: 420px;
+    max-width: 25rem;
 }
 
 .container {
@@ -97,31 +108,34 @@ mat-progress-bar {
     display: inline;
     margin-left: auto;
     margin-right: auto;
-    background-color: rgba(255, 255, 255, 0.137);
-    max-width: 400px;
+    background-color: rgba(255, 255, 255, 0.479);
+    max-width: 23rem;
     max-height: 1px;
     margin-top: 0.5rem;
 }
 
 
 #text-box {
+    box-sizing: border-box;
     display: block;
     margin-left: auto;
     margin-right: auto;
     text-align: left;
-    max-width: 640px;
+    max-width: 27rem;
     width: fit-content;
     background-color: #282C34;
     border: 1px solid var(--light-grey);
     border-radius: 0.4rem;
+    padding-left: 5px;
 }
 
 #begin-btn {
     display: inline;
     justify-content: space-around;
-    margin-top: 2.5rem;
+    margin-top: 1rem;
     font-size: 2rem;
     font-weight: normal;
+    margin-bottom: 1rem;
 }
 html, body { height: 100%;}
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
