@@ -7,13 +7,6 @@
 }
 @media screen and (max-width: 479px) {
     /* For phones */
-    pre code.hljs {
-        margin-top: 0px;
-        margin-bottom: 0px;
-        padding-top: 0px;
-        padding-bottom: 0px;
-        max-width: 320;
-    }
     html {
         font-size: 12px;
     }
@@ -67,6 +60,7 @@ pre {
 }
 
 pre code.hljs {
+    width: clamp(42ch, 100%, 72ch);
     margin-top: 0px;
     margin-bottom: 0px;
     padding-top: 0px;
@@ -75,18 +69,10 @@ pre code.hljs {
     margin-left: 0px;
 }
 
-code.hljs {
-    margin-top: 0px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-}
-
-
 mat-progress-bar {
-    display:inline;
     justify-content: center;
     border-radius: 0.4rem;
-    max-width: 25rem;
+    width: clamp(44ch, 60%, 60ch) !important;
 }
 
 .container {
@@ -104,25 +90,12 @@ mat-progress-bar {
     width: fit-content;
 }
 
-#divider {
-    display: inline;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: rgba(255, 255, 255, 0.479);
-    max-width: 23rem;
-    max-height: 1px;
-    margin-top: 0.5rem;
-}
-
-
 #text-box {
     box-sizing: border-box;
     display: block;
     margin-left: auto;
     margin-right: auto;
     text-align: left;
-    max-width: 27rem;
-    width: fit-content;
     background-color: #282C34;
     border: 1px solid var(--light-grey);
     border-radius: 0.4rem;
@@ -136,6 +109,7 @@ mat-progress-bar {
     font-size: 2rem;
     font-weight: normal;
     margin-bottom: 1rem;
+    min-width: 17rem;
 }
 html, body { height: 100%;}
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -16,8 +16,7 @@ interface Word {
 export class EncryptedTextComponent implements OnInit {
 
   constructor() {}
-  
-  originalText: string = `async onBegin() {
+  text1: string = `async onBegin() {
   // Max iteration count is equal to
   // the length of the longest word
   let iteration = 0;
@@ -45,15 +44,72 @@ export class EncryptedTextComponent implements OnInit {
           randomInt(75, 75 + iteration * 5)
           );
   }};`;
+  text2: string = `decryptString(originalString: string, 
+                    ignoredIndexes: number[]): string {
+  
+  let decryptedString: string = "";
+
+  // Pick a random index to decrypt
+  let randomIndex = randomInt(0, originalString.length);
+
+  // Check if index should be ignored
+  while (ignoredIndexes.includes(randomIndex)) {
+    randomIndex = randomInt(0, originalString.length);
+  }
+  // Add random index to ignoreed indexes
+  // so that char will be replaced with original text
+  ignoredIndexes.push(randomIndex);
+
+  // Build decrypted string
+  for (let i = 0; i < originalString.length; i++) {
+    // If index alredy decrypted
+    if (ignoredIndexes.includes(i)) {
+      decryptedString += originalString[i];
+    } else {
+      decryptedString += randomHex(1);
+    }
+  }
+  return decryptedString
+  }`;
+  text3: string = `encryptString(str: string) {
+  let encrypted: string = "";
+
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === " ") {
+      encrypted += " ";
+    } 
+    else if (
+        i < str.length - 2 && 
+        str.substring(i, i + 1) === "\\n"
+        ) {
+      encrypted += "\\n";
+    }
+    else {
+      encrypted += randomHex(1);
+    }
+  }
+  return encrypted;
+}`;
+  texts: string[] = [this.text1, this.text2, this.text3];
+  originalText: string = "";
   encryptedText: string = "";
   words: Word[] = [];
   maxWordLength: number = 0;
+  firstTime = true; 
 
   progress: number = 0;
   decrypted: boolean = false;
   buttonText: string = "BEGIN";
 
   ngOnInit(): void {
+    let textSelection: number;
+    if (this.firstTime) {
+      textSelection = 1;
+      this.firstTime = false;
+    } else {
+      textSelection = randomInt(0, this.texts.length);
+    }
+    this.originalText = this.texts[textSelection];
     this.encryptedText = this.encryptString(this.originalText);
     // Generate Word objects from original and output text
     this.words = ((): Word[] => {
@@ -99,7 +155,8 @@ export class EncryptedTextComponent implements OnInit {
     // the length of the longest word
     let iteration = 0;
     let step = 100 / this.maxWordLength;
-
+    
+    let animationIntervals: ReturnType<typeof setInterval>[] = this.animateButtonText();
     // Until all the Words are finished
     while (!this.wordsFinished(this.words)) {
       // Decrypt Words
@@ -116,18 +173,35 @@ export class EncryptedTextComponent implements OnInit {
         }
         return text;
       })();
-
+      
       iteration++;
       this.progress = iteration * step;
-      console.log("Iteration: ", iteration);
-
       await sleep(
-            randomInt(125, 125 + iteration * 10)
-            );
+        randomInt(125, 125 + iteration * 10)
+        );
     }
+    // Clear animation
+    this.clearButtonAnimation(animationIntervals);
     this.decrypted = true;
     this.buttonText = "RESET";
     btn.disabled = false;
+  }
+
+  animateButtonText(): ReturnType<typeof setInterval>[] {
+    let wait = 125;
+    let animateInterval1 = setInterval(() => {
+      this.buttonText = "DECRYPTING...";
+    }, wait + 50);
+    let animateInterval2 = setInterval(() => {
+      this.buttonText = "DECRYPTING..";
+    }, wait);
+    return [animateInterval1, animateInterval2];
+  }
+
+  clearButtonAnimation(intervals: ReturnType<typeof setInterval>[]) {
+    for (let interval of intervals ) {
+      clearInterval(interval);
+    }
   }
 
   wordsFinished(words: Word[]): boolean {
