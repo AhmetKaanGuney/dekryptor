@@ -188,14 +188,17 @@ export class EncryptedTextComponent implements OnInit {
   }
 
   animateButtonText(): ReturnType<typeof setInterval>[] {
-    let wait = 125;
+    let wait = 500;
     let animateInterval1 = setInterval(() => {
-      this.buttonText = "DECRYPTING...";
-    }, wait + 50);
-    let animateInterval2 = setInterval(() => {
-      this.buttonText = "DECRYPTING..";
+      this.buttonText = "DECRYPTING.  ";
     }, wait);
-    return [animateInterval1, animateInterval2];
+    let animateInterval2 = setInterval(() => {
+      this.buttonText = "DECRYPTING.. ";
+    }, wait + 500);
+    let animateInterval3 = setInterval(() => {
+      this.buttonText = "DECRYPTING...";
+    }, wait + 1000);
+    return [animateInterval1, animateInterval2, animateInterval3];
   }
 
   clearButtonAnimation(intervals: ReturnType<typeof setInterval>[]) {
