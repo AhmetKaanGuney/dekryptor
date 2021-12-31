@@ -19,29 +19,35 @@ export class EncryptedTextComponent implements OnInit {
   
   originalText: string = `
 async onBegin() {
+  // Max iteration count is equal to
+  // the length of the longest word
   let iteration = 0;
+  let step = 100 / this.maxWordLength;
 
-  // Until all words are finished
+  // Until all the Words are finished
   while (!this.wordsFinished(this.words)) {
-    // If word is not finihed decrypt that word
+    // Decrypt Words
     for (let word of this.words) {
       if (!word.finished) {
         this.decryptWord(word);
       }
     }
     // Update encryptedText view
-    this.outputText = ((): string => {
+    this.encryptedText = ((): string => {
       let text = "";
       for (let word of this.words) {
-        text += word.output;
+        text += word.encrypted;
       }
       return text;
     })();
 
     iteration++;
+    this.progress = iteration * step;
     console.log("Iteration: ", iteration);
 
-    await sleep(randomInt(75, 75 + iteration * 10));
+    await sleep(
+          randomInt(75, 75 + iteration * 5)
+          );
   }
 }`;
   // originalText: string = "Lol  ";
@@ -113,8 +119,6 @@ async onBegin() {
             );
 
     }
-
-
   }
 
   wordsFinished(words: Word[]): boolean {
